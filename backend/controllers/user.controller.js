@@ -1,7 +1,6 @@
 import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
 import { Post } from "../models/post.model.js";
 export const register = async (req, res) => {
@@ -120,10 +119,17 @@ export const editProfile = async (req, res) => {
         const profilePicture = req.file;
         let cloudResponse;
 
-        if (profilePicture) {
-            const fileUri = getDataUri(profilePicture);
-            cloudResponse = await cloudinary.uploader.upload(fileUri);
-        }
+       if (profilePicture) {
+    cloudResponse = await cloudinary.uploader.upload(profilePicture.path, {
+        folder: "profiles",
+        transformation: [
+            { width: 400, height: 400, crop: "limit" },
+            { quality: "auto" },
+            { fetch_format: "auto" }
+        ]
+    });
+}
+
 
         const user = await User.findById(userId).select('-password');
         if (!user) {
@@ -204,4 +210,5 @@ export const followOrUnfollow = async (req, res) => {
     } catch (error) {
         console.log(error);
     }
+
 }
