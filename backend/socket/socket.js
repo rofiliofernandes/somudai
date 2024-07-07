@@ -16,12 +16,13 @@ const io = new Server(server, {
 const userSocketMap = new Map();
 
 io.on("connection", (socket) => {
-  // Client will send userId after login
+  // Client sends userId after login
   socket.on("identify", (userId) => {
     if (userId) {
       userSocketMap.set(userId, socket.id);
     }
-    // Broadcast online users to admin panel
+
+    // Notify admin panel
     io.emit("analytics:update", { onlineUsers: userSocketMap.size });
   });
 
@@ -32,8 +33,15 @@ io.on("connection", (socket) => {
         break;
       }
     }
+
     io.emit("analytics:update", { onlineUsers: userSocketMap.size });
   });
 });
 
-export { app, server, io };
+// ⭐ ADD THIS FUNCTION
+const getReceiverSocketId = (userId) => {
+  return userSocketMap.get(userId);
+};
+
+// ⭐ EXPORT EVERYTHING
+export { app, server, io, getReceiverSocketId };
