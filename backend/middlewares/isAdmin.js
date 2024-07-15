@@ -1,38 +1,20 @@
-import jwt from "jsonwebtoken";
-import User from "../models/user.model.js";
+import { User } from "../models/user.model.js";
 
-export default async function isAdmin(req, res, next) {
-  try {
-    const authHeader = req.headers.authorization || req.cookies.token;
-    if (!authHeader) return res.status(401).json({ message: "Not authenticated" });
+export const isAdmin = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.id);
 
-    const token = authHeader.startsWith("Bearer ")
-      ? authHeader.split(" ")[1]
-      : authHeader;
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
 
-    const payload = jwt.verify(
-      token,
-      process.env.JWT_SECRET || process.env.SECRET_KEY
-    );
+        if (user.email !== process.env.ADMIN_EMAIL) {
+            return res.status(403).json({ success: false, message: "Access denied" });
+        }
 
-    if (!payload || !payload.id) {
-      return res.status(401).json({ message: "Invalid token" });
+        next();
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, message: "Server error" });
     }
-
-    const user = await User.findById(payload.id).select("+role");
-
-    if (!user) return res.status(401).json({ message: "User not found" });
-
-    if (user.role !== "admin") {
-      return res.status(403).json({ message: "Not authorized" });
-    }
-
-    req.user = user;
-    next();
-  } catch (err) {
-    return res.status(401).json({
-      message: "Authentication failed",
-      error: err.message,
-    });
-  }
-}
+};
