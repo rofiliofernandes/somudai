@@ -1,23 +1,16 @@
+import passport from "passport";
 import express from "express";
-import { register, login, getProfile, editProfile, followOrUnfollow } from "../controllers/user.controller.js";
-import { isAuthenticated } from "../middlewares/isAuthenticated.js";
-import { upload } from "../middlewares/multer.js";
-
 const router = express.Router();
 
-// Register
-router.post("/register", register);
+router.get("/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
 
-// Login
-router.post("/login", login);
-
-// Get profile (requires token)
-router.get("/profile", isAuthenticated, getProfile);
-
-// Update profile (bio, gender, avatar)
-router.put("/profile", isAuthenticated, upload.single("avatar"), editProfile);
-
-// Follow / Unfollow
-router.put("/follow/:id", isAuthenticated, followOrUnfollow);
+router.get("/auth/google/callback",
+  passport.authenticate("google", {
+    successRedirect: process.env.CLIENT_URL,
+    failureRedirect: process.env.CLIENT_URL + "/login"
+  })
+);
 
 export default router;
