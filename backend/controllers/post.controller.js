@@ -5,81 +5,119 @@ import { User } from "../models/user.model.js";
 import { Comment } from "../models/comment.model.js";
 import { getReceiverSocketId, io } from "../socket/socket.js";
 
+/*
+    POST TYPES SUPPORTED:
+    - "image" → requires an uploaded image
+    - "text"  → tweet-style text post (no image)
+*/
+
+
+//  CREATE NEW POST (IMAGE or TEXT)
+
 export const addNewPost = async (req, res) => {
     try {
-        const { caption } = req.body;
-        const image = req.file;
+        const { caption, type } = req.body; // type = "text" or "image"
+        const file = req.file;
         const authorId = req.id;
 
-        if (!image) return res.status(400).json({ message: "Image required" });
-
-        // Resize + optimize image
-        const optimizedImageBuffer = await sharp(image.buffer)
-            .resize({ width: 800, height: 800, fit: "inside" })
-            .toFormat("jpeg", { quality: 80 })
-            .toBuffer();
-
-        const fileUri = `data:image/jpeg;base64,${optimizedImageBuffer.toString("base64")}`;
-        const cloudResponse = await cloudinary.uploader.upload(fileUri);
-
-        const post = await Post.create({
-            caption,
-            image: cloudResponse.secure_url,
-            author: authorId
-        });
-
-        const user = await User.findById(authorId);
-        if (user) {
-            user.posts.push(post._id);
-            await user.save();
+        if (!type) {
+            return res.status(400).json({ message: "Post type required" });
         }
 
-        await post.populate({ path: "author", select: "-password" });
+        /
+        // CASE 1: TEXT POST (TWEET)
+        
+        if (type === "text") {
+            if (!caption || caption.trim().length === 0) {
+                return res.status(400).json({ message: "Text content required" });
+            }
 
-        return res.status(201).json({
-            message: "New post added",
-            post,
-            success: true
-        });
+            if (caption.length > 280) {
+                return res.status(400).json({ message: "Text post cannot exceed 280 characters" });
+            }
+
+            const post = await Post.create({
+                caption,
+                image: null,
+                type: "text",
+                author: authorId
+            });
+
+            const user = await User.findById(authorId);
+            if (user) {
+                user.posts.push(post._id);
+                await user.save();
+            }
+
+            await post.populate({ path: "author", select: "-password" });
+
+            return res.status(201).json({
+                message: "Text post created",
+                post,
+                success: true
+            });
+        }
+
+        
+        // CASE 2: IMAGE POST
+        
+        if (type === "image") {
+            if (!file) {
+                return res.status(400).json({ message: "Image required" });
+            }
+
+            // Reject videos
+            if (!file.mimetype.startsWith("image/")) {
+                return res.status(400).json({ message: "Only image uploads allowed" });
+            }
+
+            // Resize + optimize using sharp
+            const optimized = await sharp(file.buffer)
+                .resize({ width: 800, height: 800, fit: "inside" })
+                .jpeg({ quality: 80 })
+                .toBuffer();
+
+            const fileUri = `data:image/jpeg;base64,${optimized.toString("base64")}`;
+            const cloud = await cloudinary.uploader.upload(fileUri);
+
+            const post = await Post.create({
+                caption,
+                image: cloud.secure_url,
+                type: "image",
+                author: authorId
+            });
+
+            const user = await User.findById(authorId);
+            if (user) {
+                user.posts.push(post._id);
+                await user.save();
+            }
+
+            await post.populate({ path: "author", select: "-password" });
+
+            return res.status(201).json({
+                message: "Image post created",
+                post,
+                success: true
+            });
+        }
+
+        return res.status(400).json({ message: "Invalid post type" });
 
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({ success: false, message: "Server error" });
+        console.log("POST ERROR:", error);
+        return res.status(500).json({ message: "Server error", success: false });
     }
 };
+
+
+//  GET ALL POSTS
 
 export const getAllPost = async (req, res) => {
     try {
         const posts = await Post.find()
             .sort({ createdAt: -1 })
             .populate({ path: "author", select: "username profilePicture" })
-            .populate({
-                path: "comments",
-                sort: { createdAt: -1 },
-                populate: {
-                    path: "author",
-                    select: "username profilePicture"
-                }
-            });
-
-        return res.status(200).json({ posts, success: true });
-
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ success: false });
-    }
-};
-
-export const getUserPost = async (req, res) => {
-    try {
-        const authorId = req.id;
-
-        const posts = await Post.find({ author: authorId })
-            .sort({ createdAt: -1 })
-            .populate({
-                path: "author",
-                select: "username profilePicture"
-            })
             .populate({
                 path: "comments",
                 sort: { createdAt: -1 },
@@ -93,6 +131,31 @@ export const getUserPost = async (req, res) => {
         return res.status(500).json({ success: false });
     }
 };
+
+
+//  GET POSTS FOR LOGGED-IN USER
+
+export const getUserPost = async (req, res) => {
+    try {
+        const posts = await Post.find({ author: req.id })
+            .sort({ createdAt: -1 })
+            .populate({ path: "author", select: "username profilePicture" })
+            .populate({
+                path: "comments",
+                sort: { createdAt: -1 },
+                populate: { path: "author", select: "username profilePicture" }
+            });
+
+        return res.status(200).json({ posts, success: true });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false });
+    }
+};
+
+
+//  LIKE POST
 
 export const likePost = async (req, res) => {
     try {
@@ -108,15 +171,16 @@ export const likePost = async (req, res) => {
 
         const receiverId = post.author.toString();
         if (receiverId !== userId) {
-            const notification = {
-                type: "like",
-                userId,
-                userDetails: user,
-                postId,
-                message: "Your post was liked"
-            };
             const socketId = getReceiverSocketId(receiverId);
-            if (socketId) io.to(socketId).emit("notification", notification);
+            if (socketId) {
+                io.to(socketId).emit("notification", {
+                    type: "like",
+                    userId,
+                    userDetails: user,
+                    postId,
+                    message: "Your post was liked"
+                });
+            }
         }
 
         return res.status(200).json({ success: true, message: "Post liked" });
@@ -127,15 +191,15 @@ export const likePost = async (req, res) => {
     }
 };
 
+
+//  DISLIKE POST
+
 export const dislikePost = async (req, res) => {
     try {
         const userId = req.id;
         const postId = req.params.id;
 
-        const post = await Post.findById(postId);
-        if (!post) return res.status(404).json({ message: "Post not found" });
-
-        await post.updateOne({ $pull: { likes: userId } });
+        await Post.findByIdAndUpdate(postId, { $pull: { likes: userId } });
 
         return res.status(200).json({ success: true, message: "Post disliked" });
 
@@ -144,6 +208,9 @@ export const dislikePost = async (req, res) => {
         return res.status(500).json({ success: false });
     }
 };
+
+
+//  ADD COMMENT
 
 export const addComment = async (req, res) => {
     try {
@@ -161,9 +228,7 @@ export const addComment = async (req, res) => {
 
         await comment.populate("author", "username profilePicture");
 
-        const post = await Post.findById(postId);
-        post.comments.push(comment._id);
-        await post.save();
+        await Post.findByIdAndUpdate(postId, { $push: { comments: comment._id } });
 
         return res.status(201).json({
             success: true,
@@ -177,10 +242,13 @@ export const addComment = async (req, res) => {
     }
 };
 
+
+//  DELETE POST
+
 export const deletePost = async (req, res) => {
     try {
-        const postId = req.params.id;
         const userId = req.id;
+        const postId = req.params.id;
 
         const post = await Post.findById(postId);
         if (!post) return res.status(404).json({ message: "Post not found" });
@@ -193,13 +261,18 @@ export const deletePost = async (req, res) => {
         await User.findByIdAndUpdate(userId, { $pull: { posts: postId } });
         await Comment.deleteMany({ post: postId });
 
-        return res.status(200).json({ message: "Post deleted", success: true });
+        return res.status(200).json({
+            message: "Post deleted",
+            success: true
+        });
 
     } catch (error) {
         console.log(error);
         return res.status(500).json({ success: false });
     }
 };
+
+//  BOOKMARK POST
 
 export const bookmarkPost = async (req, res) => {
     try {
@@ -216,8 +289,6 @@ export const bookmarkPost = async (req, res) => {
             await user.updateOne({ $addToSet: { bookmarks: postId } });
             type = "saved";
         }
-
-        await user.save();
 
         return res.status(200).json({ type, success: true });
 
