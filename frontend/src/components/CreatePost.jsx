@@ -25,20 +25,40 @@ const CreatePost = ({ open, setOpen }) => {
   const { posts } = useSelector(store => store.post);
   const dispatch = useDispatch();
 
-  const fileChangeHandler = async (e) => {
-    const file = e.target.files?.[0];
+ const fileChangeHandler = async (e) => {
+  const selectedFile = e.target.files?.[0];
+  if (!selectedFile) return;
 
-    if (file && !file.type.startsWith("image/")) {
-      return toast.error("Only image uploads allowed");
-    }
+  // ❌ Block videos
+  if (!selectedFile.type.startsWith("image/")) {
+    toast.error("Only image files are allowed (no videos)");
+    e.target.value = null;
+    return;
+  }
 
-    if (file) {
-      setFile(file);
-      const dataUrl = await readFileAsDataURL(file);
-      setImagePreview(dataUrl);
-    }
-  };
+  // ❌ Block large images (5 MB limit)
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  if (selectedFile.size > maxSize) {
+    toast.error("Image size must be under 5MB");
+    e.target.value = null;
+    return;
+  }
 
+  // ✅ Allowed formats
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+  if (!allowedTypes.includes(selectedFile.type)) {
+    toast.error("Only JPG, PNG, or WEBP images allowed");
+    e.target.value = null;
+    return;
+  }
+
+  setFile(selectedFile);
+  const dataUrl = await readFileAsDataURL(selectedFile);
+  setImagePreview(dataUrl);
+};
+
+
+  
   const createPostHandler = async () => {
     const formData = new FormData();
 
@@ -188,3 +208,4 @@ const CreatePost = ({ open, setOpen }) => {
 };
 
 export default CreatePost;
+
