@@ -3,7 +3,9 @@ import mongoose from "mongoose";
 const postSchema = new mongoose.Schema({
     caption: { type: String },
     image:   { type: String, required: true },
+type: { type: String, enum: ["text", "image"], default: "image" },
 
+    
     author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 
     likes:    [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
@@ -15,4 +17,5 @@ type: { type: String, enum: ["image", "text"], required: true },
 
 
 export const Post = mongoose.model("Post", postSchema);
+
 
