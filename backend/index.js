@@ -7,8 +7,6 @@ import passport from "passport";
 import "./auth/google.js";
 
 
-
-
 // Routes
 import userRoutes from "./routes/user.route.js";
 import postRoutes from "./routes/post.route.js";
@@ -20,14 +18,15 @@ import { initSocket } from "./socket/socket.js";
 
 dotenv.config();
 
+const app = express();
+const server = http.createServer(app);
+
 app.use("/api/v1/auth", authRoutes);
 
 app.use(passport.initialize());
 
 
 
-const app = express();
-const server = http.createServer(app);
 
 // Middlewares
 app.use(express.json());
@@ -54,6 +53,7 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
+
 
 
 
