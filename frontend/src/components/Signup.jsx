@@ -102,8 +102,10 @@ const Signup = () => {
                 }
                 <span className='text-center'>Already have an account? <Link to="/login" className='text-blue-600'>Login</Link></span>
             </form>
+            <img src="/src/assets/google.svg" />
         </div>
     )
 }
+
 
 export default Signup
