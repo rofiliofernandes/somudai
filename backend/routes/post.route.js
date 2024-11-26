@@ -18,7 +18,8 @@ const router = express.Router();
 router.post("/", isAuthenticated, upload.single("image"), addNewPost);
 
 //Create tweet
-router.post("/tweet", isAuthenticated, createTweet);
+router.post("/addpost", isAuthenticated, upload.single("image"), addNewPost);
+
 
 // All posts
 router.get("/", isAuthenticated, getAllPost);
@@ -37,4 +38,5 @@ router.post("/comment/:id", isAuthenticated, addComment);
 router.delete("/:id", isAuthenticated, deletePost);
 
 export default router;
+
 
