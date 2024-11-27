@@ -89,7 +89,9 @@ const Login = () => {
                         </Button>
                     ) : (
                         <Button type='submit'>Login</Button>
-             <button
+ 
+
+            <button
   type="button"
   onClick={() => {
     window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
@@ -98,6 +100,7 @@ const Login = () => {
 >
   Continue with Google
 </button>
+
 
 
                     )
