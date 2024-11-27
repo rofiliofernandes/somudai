@@ -1,8 +1,11 @@
+import "./config/env.js"; 
+
 import express from "express";
 import http from "http";
 import cors from "cors";
 import dotenv from "dotenv";
-import connectDB from "./utils/db.js";
+dotenv.config();
+import connectDB from "./utils/db.js"; 
 import passport from "passport";
 import "./auth/google.js";
 
@@ -16,7 +19,6 @@ import authRoutes from "./routes/auth.route.js";
 // Socket.IO
 import { initSocket } from "./socket/socket.js";
 
-dotenv.config();
 
 const app = express();
 app.use(express.json());
@@ -54,6 +56,7 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
+
 
 
 
