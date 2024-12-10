@@ -98,14 +98,24 @@ const Signup = () => {
                         </Button>
                     ) : (
                         <Button type='submit'>Signup</Button>
+                        <button
+              type="button"
+              onClick={() => {
+                window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+              }}
+              className="flex items-center justify-center gap-2 border p-2 rounded-md w-full mt-2 bg-white text-gray-700 hover:bg-gray-100"
+            >
+              Continue with Google
+            <img src="/src/assets/google.svg" />
+            </button>
                     )
                 }
                 <span className='text-center'>Already have an account? <Link to="/login" className='text-blue-600'>Login</Link></span>
             </form>
-            <img src="/src/assets/google.svg" />
         </div>
     )
 }
 
 
 export default Signup
+
