@@ -7,6 +7,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useSelector } from "react-redux";
 
+// ✅ Import Google logo correctly (Vite-safe)
+import googleLogo from "../assets/google.svg";
+
 const Signup = () => {
   const [input, setInput] = useState({
     username: "",
@@ -90,4 +93,65 @@ const Signup = () => {
         </div>
 
         <div>
-          <spa
+          <span className="font-medium">Email</span>
+          <Input
+            type="email"
+            name="email"
+            value={input.email}
+            onChange={changeEventHandler}
+            className="focus-visible:ring-transparent my-2"
+            required
+          />
+        </div>
+
+        <div>
+          <span className="font-medium">Password</span>
+          <Input
+            type="password"
+            name="password"
+            value={input.password}
+            onChange={changeEventHandler}
+            className="focus-visible:ring-transparent my-2"
+            required
+          />
+        </div>
+
+        {loading ? (
+          <Button disabled>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Please wait
+          </Button>
+        ) : (
+          <>
+            <Button type="submit">Signup</Button>
+
+            {/* ✅ Google Signup Button */}
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+              }}
+              className="flex items-center justify-center gap-2 border p-2 rounded-md w-full mt-2 bg-white text-gray-700 hover:bg-gray-100"
+            >
+              <img
+                src={googleLogo}
+                alt="Google"
+                className="w-5 h-5"
+              />
+              Continue with Google
+            </button>
+          </>
+        )}
+
+        <span className="text-center text-sm">
+          Already have an account?{" "}
+          <Link to="/login" className="text-blue-600">
+            Login
+          </Link>
+        </span>
+      </form>
+    </div>
+  );
+};
+
+export default Signup;
