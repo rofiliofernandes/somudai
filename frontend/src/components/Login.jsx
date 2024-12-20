@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setAuthUser } from "@/redux/authSlice";
+import googleLogo from "../assets/google.svg";
 
 const Login = () => {
   const [input, setInput] = useState({
@@ -116,6 +117,11 @@ const Login = () => {
               }}
               className="flex items-center justify-center gap-2 border p-2 rounded-md w-full mt-2 bg-white text-gray-700 hover:bg-gray-100"
             >
+              <img
+                src={googleLogo}
+                alt="Google"
+                className="w-5 h-5"
+              />
               Continue with Google
             </button>
           </>
@@ -133,3 +139,4 @@ const Login = () => {
 };
 
 export default Login;
+
