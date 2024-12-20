@@ -39,10 +39,10 @@ app.use("/api/v1/auth", authRoutes);
 connectDB();
 
 // Use routes
-app.use("/api/user", userRoutes);
-app.use("/api/post", postRoutes);
-app.use("/api/message", messageRoutes);
-app.use("/api/admin", adminRoutes);
+app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/post", postRoutes);
+app.use("/api/v1/message", messageRoutes);
+app.use("/api/v1/admin", adminRoutes);
 
 // Initialize Socket.IO on same server
 initSocket(server);
@@ -53,6 +53,7 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
+
 
 
 
