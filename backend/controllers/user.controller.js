@@ -44,38 +44,44 @@ return res.status(201).json({
 
 // LOGIN
 export const login = async (req, res) => {
-    try {
-        const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-        if (!email || !password)
-            return res.status(400).json({ message: "Missing fields", success: false });
+    if (!email || !password)
+      return res.status(400).json({ success: false, message: "Missing fields" });
 
-        const user = await User.findOne({ email });
-        if (!user)
-            return res.status(404).json({ message: "User not found", success: false });
+    const user = await User.findOne({ email });
+    if (!user)
+      return res.status(404).json({ success: false, message: "User not found" });
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch)
-            return res.status(401).json({ message: "Invalid password", success: false });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch)
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
 
-        const token = jwt.sign(
-            { id: user._id },
-            process.env.JWT_SECRET,
-            { expiresIn: "7d" }
-        );
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
-        return res.status(200).json({
-            message: "Login successful",
-            success: true,
-            token,
-            user
-        });
+    // 🔐 remove password
+    const { password: _, ...safeUser } = user.toObject();
 
-    } catch (err) {
-        console.log(err);
-        return res.status(500).json({ message: "Internal server error", success: false });
-    }
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Login successful",
+        token,
+        user: safeUser
+      });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
 };
+
 
 
 // GET PROFILE
@@ -179,4 +185,5 @@ export const followOrUnfollow = async (req, res) => {
         return res.status(500).json({ message: "Internal server error", success: false });
     }
 };
+
 
