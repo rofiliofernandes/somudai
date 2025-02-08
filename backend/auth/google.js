@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import jwt from "jsonwebtoken";
-import User from "../models/user.model.js";
+import {User} from "../models/user.model.js";
 
 passport.use(
   new GoogleStrategy(
@@ -39,3 +39,4 @@ passport.use(
     }
   )
 );
+
