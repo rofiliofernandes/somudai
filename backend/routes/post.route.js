@@ -9,7 +9,9 @@ import {
     deletePost
 } from "../controllers/post.controller.js";
 
-import { isAuthenticated } from "../middlewares/isAuthenticated.js";
+
+import isAuthenticated from "../middlewares/isAuthenticated.js";
+
 import { upload } from "../middlewares/multer.js";
 
 const router = express.Router();
@@ -38,5 +40,6 @@ router.post("/comment/:id", isAuthenticated, addComment);
 router.delete("/:id", isAuthenticated, deletePost);
 
 export default router;
+
 
 
