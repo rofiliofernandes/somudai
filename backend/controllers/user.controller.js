@@ -85,6 +85,18 @@ export const login = async (req, res) => {
   }
 };
 
+//GET LOGOUT
+
+export const logout = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+  });
+
+  res.status(200).json({ success: true, message: "Logged out" });
+};
+
 
 
 
@@ -189,6 +201,7 @@ export const followOrUnfollow = async (req, res) => {
         return res.status(500).json({ message: "Internal server error", success: false });
     }
 };
+
 
 
 
