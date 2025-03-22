@@ -6,7 +6,7 @@ import { Button } from './ui/button'
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import CommentDialog from './CommentDialog'
 import { useDispatch, useSelector } from 'react-redux'
-import axios from 'axios'
+import api from '@/lib/axios'
 import { toast } from 'sonner'
 import { setPosts, setSelectedPost } from '@/redux/postSlice'
 import { Badge } from './ui/badge'
@@ -29,8 +29,8 @@ const Post = ({ post }) => {
     const likeOrDislikeHandler = async () => {
         try {
             const action = liked ? 'dislike' : 'like';
-            const res = await axios.get(
-                `https://instaclone-g9h5.onrender.com/api/v1/post/${post._id}/${action}`,
+            const res = await api.get(
+                `/post/${post._id}/${action}`,
                 { withCredentials: true }
             );
 
@@ -58,8 +58,8 @@ const Post = ({ post }) => {
 
     const commentHandler = async () => {
         try {
-            const res = await axios.post(
-                `https://instaclone-g9h5.onrender.com/api/v1/post/${post._id}/comment`,
+            const res = await api.post(
+                `/post/${post._id}/comment`,
                 { text },
                 {
                     headers: { 'Content-Type': 'application/json' },
@@ -86,8 +86,8 @@ const Post = ({ post }) => {
 
     const deletePostHandler = async () => {
         try {
-            const res = await axios.delete(
-                `https://instaclone-g9h5.onrender.com/api/v1/post/delete/${post?._id}`,
+            const res = await api.delete(
+                `/post/delete/${post?._id}`,
                 { withCredentials: true }
             );
 
@@ -107,8 +107,8 @@ const Post = ({ post }) => {
 
     const bookmarkHandler = async () => {
         try {
-            const res = await axios.get(
-                `https://instaclone-g9h5.onrender.com/api/v1/post/${post?._id}/bookmark`,
+            const res = await api.get(
+                `/post/${post?._id}/bookmark`,
                 { withCredentials: true }
             );
             if (res.data.success) {
