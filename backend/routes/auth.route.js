@@ -3,7 +3,9 @@ import passport from "passport";
 
 const router = express.Router();
 
-// Start Google OAuth
+/**
+ * Start Google OAuth
+ */
 router.get(
   "/google",
   passport.authenticate("google", {
@@ -12,7 +14,9 @@ router.get(
   })
 );
 
-// Google callback
+/**
+ * Google OAuth callback
+ */
 router.get(
   "/google/callback",
   passport.authenticate("google", {
@@ -24,13 +28,29 @@ router.get(
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,       // REQUIRED on Render
-      sameSite: "none",   // REQUIRED for frontend-backend
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.redirect(`${process.env.CLIENT_URL}/oauth-success`);
+    res.redirect(process.env.CLIENT_URL);
   }
 );
+
+/**
+ * Logout
+ */
+router.post("/logout", (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "none",
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Logged out",
+  });
+});
 
 export default router;
