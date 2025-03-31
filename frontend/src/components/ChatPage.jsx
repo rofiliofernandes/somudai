@@ -6,7 +6,7 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { MessageCircleCode } from 'lucide-react';
 import Messages from './Messages';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { setMessages } from '@/redux/chatSlice';
 
 const ChatPage = () => {
@@ -17,7 +17,7 @@ const ChatPage = () => {
 
     const sendMessageHandler = async (receiverId) => {
         try {
-            const res = await axios.post(`https://instaclone-g9h5.onrender.com/api/v1/message/send/${receiverId}`, { textMessage }, {
+            const res = await api.post(`/message/send/${receiverId}`, { textMessage }, {
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -36,7 +36,7 @@ const ChatPage = () => {
         return () => {
             dispatch(setSelectedUser(null));
         }
-    },[]);
+    }, [dispatch]);
 
     return (
         <div className='flex ml-[16%] h-screen'>
@@ -48,7 +48,7 @@ const ChatPage = () => {
                         suggestedUsers.map((suggestedUser) => {
                             const isOnline = onlineUsers.includes(suggestedUser?._id);
                             return (
-                                <div onClick={() => dispatch(setSelectedUser(suggestedUser))} className='flex gap-3 items-center p-3 hover:bg-gray-50 cursor-pointer'>
+                                <div key={suggestedUser?._id} onClick={() => dispatch(setSelectedUser(suggestedUser))} className='flex gap-3 items-center p-3 hover:bg-gray-50 cursor-pointer'>
                                     <Avatar className='w-14 h-14'>
                                         <AvatarImage src={suggestedUser?.profilePicture} />
                                         <AvatarFallback>CN</AvatarFallback>

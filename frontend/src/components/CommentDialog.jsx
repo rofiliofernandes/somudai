@@ -6,7 +6,7 @@ import { MoreHorizontal } from 'lucide-react'
 import { Button } from './ui/button'
 import { useDispatch, useSelector } from 'react-redux'
 import Comment from './Comment'
-import axios from 'axios'
+import api from '@/lib/axios'
 import { toast } from 'sonner'
 import { setPosts } from '@/redux/postSlice'
 
@@ -34,7 +34,7 @@ const CommentDialog = ({ open, setOpen }) => {
   const sendMessageHandler = async () => {
 
     try {
-      const res = await axios.post(`https://instaclone-g9h5.onrender.com/api/v1/post/${selectedPost?._id}/comment`, { text }, {
+      const res = await api.post(`/post/${selectedPost?._id}/comment`, { text }, {
         headers: {
           'Content-Type': 'application/json'
         },
