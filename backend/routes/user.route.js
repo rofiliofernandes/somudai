@@ -3,6 +3,7 @@ import { protect } from "../middlewares/auth.middleware.js";
 import {
   register,
   login,
+  refreshToken,
   getProfile,
   editProfile,
   followOrUnfollow

@@ -53,9 +53,12 @@ function App() {
   const { socket } = useSelector(store => store.socketio);
   const dispatch = useDispatch();
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const socketUrl = new URL(apiUrl || window.location.origin, window.location.origin).origin;
+
   useEffect(() => {
     if (user) {
-      const socketio = io('http://localhost:8000', {
+      const socketio = io(socketUrl, {
         query: {
           userId: user?._id
         },
@@ -80,7 +83,7 @@ function App() {
       socket.close();
       dispatch(setSocket(null));
     }
-  }, [user, dispatch]);
+  }, [user, dispatch, socket, socketUrl]);
 
   return (
     <>
