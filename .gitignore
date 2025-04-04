@@ -39,3 +39,11 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# env files: never commit secrets (only .env.example is tracked)
+.env
+.env.*
+!.env.example
+
+# test output
+coverage/
