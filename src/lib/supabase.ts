@@ -1,5 +1,5 @@
 import 'react-native-url-polyfill/auto';
-import { Platform } from 'react-native';
+import { AppState, Platform } from 'react-native';
 import { createClient } from '@supabase/supabase-js';
 import { secureSessionStorage } from './secureSessionStorage';
 import { env } from './env';
@@ -16,3 +16,12 @@ export const supabase = createClient(env.supabaseUrl, env.supabaseAnonKey, {
     flowType: 'pkce',
   },
 });
+
+// On phones, only refresh the session while the app is in the foreground
+// (as Supabase's React Native guide recommends).
+if (Platform.OS !== 'web') {
+  AppState.addEventListener('change', (state) => {
+    if (state === 'active') supabase.auth.startAutoRefresh();
+    else supabase.auth.stopAutoRefresh();
+  });
+}
