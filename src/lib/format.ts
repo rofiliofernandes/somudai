@@ -53,3 +53,16 @@ export function initials(name: string | null | undefined): string {
   const last = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? '') : '';
   return (first + last).toUpperCase();
 }
+
+/** "Environment · North Goa · Sun 13 Dec" (date only for actions). */
+export function metaLine(post: {
+  matter_name: string;
+  area: string | null;
+  type: 'action' | 'stance';
+  starts_at: string | null;
+}): string {
+  const parts = [post.matter_name];
+  if (post.area) parts.push(post.area);
+  if (post.type === 'action' && post.starts_at) parts.push(formatShortDate(post.starts_at));
+  return parts.join(' · ');
+}

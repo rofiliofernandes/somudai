@@ -1,4 +1,4 @@
-import { formatCompact, formatFull, formatShortDate, formatTime, initials } from './format';
+import { formatCompact, formatFull, formatShortDate, formatTime, initials, metaLine } from './format';
 
 describe('formatFull', () => {
   it('adds commas', () => {
@@ -47,5 +47,15 @@ describe('initials', () => {
     expect(initials('asha')).toBe('A');
     expect(initials('  Rofilio  de  Fernandes ')).toBe('RF');
     expect(initials(null)).toBe('');
+  });
+});
+
+describe('metaLine', () => {
+  it('adds the date for actions only', () => {
+    const starts = new Date(2026, 11, 13, 7, 0).toISOString();
+    expect(metaLine({ matter_name: 'Environment', area: 'North Goa', type: 'action', starts_at: starts })).toBe(
+      'Environment · North Goa · Sun 13 Dec',
+    );
+    expect(metaLine({ matter_name: 'Civic', area: null, type: 'stance', starts_at: null })).toBe('Civic');
   });
 });
