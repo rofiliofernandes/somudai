@@ -1,36 +1,39 @@
-import {Server} from "socket.io";
 import express from "express";
 import http from "http";
+import { Server } from "socket.io";
 
 const app = express();
-
 const server = http.createServer(app);
 
 const io = new Server(server, {
-    cors:{
-        origin:process.env.URL,
-        methods:['GET','POST']
+  cors: {
+    origin: process.env.CLIENT_URL || "*",
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
+
+const userSocketMap = new Map();
+
+io.on("connection", (socket) => {
+  // Client will send userId after login
+  socket.on("identify", (userId) => {
+    if (userId) {
+      userSocketMap.set(userId, socket.id);
     }
-})
+    // Broadcast online users to admin panel
+    io.emit("analytics:update", { onlineUsers: userSocketMap.size });
+  });
 
-const userSocketMap = {} ; // this map stores socket id corresponding the user id; userId -> socketId
-
-export const getReceiverSocketId = (receiverId) => userSocketMap[receiverId];
-
-io.on('connection', (socket)=>{
-    const userId = socket.handshake.query.userId;
-    if(userId){
-        userSocketMap[userId] = socket.id;
+  socket.on("disconnect", () => {
+    for (const [userId, sockId] of userSocketMap.entries()) {
+      if (sockId === socket.id) {
+        userSocketMap.delete(userId);
+        break;
+      }
     }
+    io.emit("analytics:update", { onlineUsers: userSocketMap.size });
+  });
+});
 
-    io.emit('getOnlineUsers', Object.keys(userSocketMap));
-
-    socket.on('disconnect',()=>{
-        if(userId){
-            delete userSocketMap[userId];
-        }
-        io.emit('getOnlineUsers', Object.keys(userSocketMap));
-    });
-})
-
-export {app, server, io};
+export { app, server, io };
