@@ -1,29 +1,15 @@
 import express from "express";
-import isAdmin from "../middlewares/isAdmin.js";
-import User from "../models/user.model.js";
-import Post from "../models/post.model.js";
+import { isAuthenticated } from "../middlewares/isAuthenticated.js";
+import { isAdmin } from "../middlewares/isAdmin.js";
 
 const router = express.Router();
 
-// Admin analytics overview
-router.get("/overview", isAdmin, async (req, res) => {
-  try {
-    const userCount = await User.countDocuments();
-    const postCount = await Post.countDocuments();
-
-    const recentUsers = await User.find()
-      .sort({ createdAt: -1 })
-      .limit(5)
-      .select("email createdAt");
-
-    res.json({
-      userCount,
-      postCount,
-      recentUsers,
+// Example admin route
+router.get("/dashboard", isAuthenticated, isAdmin, (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "Admin panel access granted"
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
 });
 
 export default router;
