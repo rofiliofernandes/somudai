@@ -1,16 +1,36 @@
 import express from "express";
-import { editProfile, followOrUnfollow, getProfile, getSuggestedUsers, login, logout, register } from "../controllers/user.controller.js";
-import isAuthenticated from "../middlewares/isAuthenticated.js";
-import upload from "../middlewares/multer.js";
+import {
+    addNewPost,
+    getAllPost,
+    getUserPost,
+    likePost,
+    dislikePost,
+    addComment,
+    deletePost
+} from "../controllers/post.controller.js";
+
+import { isAuthenticated } from "../middlewares/isAuthenticated.js";
+import { upload } from "../middlewares/multer.js";
 
 const router = express.Router();
 
-router.route('/register').post(register);
-router.route('/login').post(login);
-router.route('/logout').get(logout);
-router.route('/:id/profile').get(isAuthenticated, getProfile);
-router.route('/profile/edit').post(isAuthenticated, upload.single('profilePhoto'), editProfile);
-router.route('/suggested').get(isAuthenticated, getSuggestedUsers);
-router.route('/followorunfollow/:id').post(isAuthenticated, followOrUnfollow);
+// Create post
+router.post("/", isAuthenticated, upload.single("image"), addNewPost);
+
+// All posts
+router.get("/", isAuthenticated, getAllPost);
+
+// User's posts
+router.get("/me", isAuthenticated, getUserPost);
+
+// Like / dislike
+router.put("/like/:id", isAuthenticated, likePost);
+router.put("/dislike/:id", isAuthenticated, dislikePost);
+
+// Comment
+router.post("/comment/:id", isAuthenticated, addComment);
+
+// Delete post
+router.delete("/:id", isAuthenticated, deletePost);
 
 export default router;
