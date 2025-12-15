@@ -1,12 +1,15 @@
 import multer from "multer";
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, "/tmp"); // Render-friendly temp folder
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + "-" + file.originalname);
-    }
-});
+const storage = multer.memoryStorage();
 
-export const upload = multer({ storage });
+function fileFilter(req, file, cb) {
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!allowed.includes(file.mimetype)) {
+        return cb(new Error("Only image files are allowed!"), false);
+    }
+
+    cb(null, true);
+}
+
+export const upload = multer({ storage, fileFilter });
