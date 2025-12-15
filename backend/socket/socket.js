@@ -1,47 +1,51 @@
-import express from "express";
-import http from "http";
 import { Server } from "socket.io";
 
-const app = express();
-const server = http.createServer(app);
+// Socket.io instance (will be initialized later)
+let io;
 
-const io = new Server(server, {
-  cors: {
-    origin: process.env.CLIENT_URL || "*",
-    methods: ["GET", "POST"],
-    credentials: true
-  }
-});
-
+// Store userId → socketId mapping
 const userSocketMap = new Map();
 
-io.on("connection", (socket) => {
-  // Client sends userId after login
-  socket.on("identify", (userId) => {
-    if (userId) {
-      userSocketMap.set(userId, socket.id);
-    }
+// Initialize socket server
+export const initSocket = (server) => {
+    io = new Server(server, {
+        cors: {
+            origin: process.env.CLIENT_URL || "*",
+            methods: ["GET", "POST"],
+            credentials: true
+        }
+    });
 
-    // Notify admin panel
-    io.emit("analytics:update", { onlineUsers: userSocketMap.size });
-  });
+    io.on("connection", (socket) => {
+        console.log(`⚡ User connected: ${socket.id}`);
 
-  socket.on("disconnect", () => {
-    for (const [userId, sockId] of userSocketMap.entries()) {
-      if (sockId === socket.id) {
-        userSocketMap.delete(userId);
-        break;
-      }
-    }
+        // Client identifies itself (after login)
+        socket.on("identify", (userId) => {
+            if (userId) {
+                userSocketMap.set(userId, socket.id);
+                console.log(`Mapped user ${userId} → ${socket.id}`);
+            }
+        });
 
-    io.emit("analytics:update", { onlineUsers: userSocketMap.size });
-  });
-});
+        // Handle disconnects
+        socket.on("disconnect", () => {
+            for (const [uid, sid] of userSocketMap.entries()) {
+                if (sid === socket.id) {
+                    userSocketMap.delete(uid);
+                    console.log(`User ${uid} disconnected`);
+                    break;
+                }
+            }
+        });
+    });
 
-// ⭐ ADD THIS FUNCTION
-const getReceiverSocketId = (userId) => {
-  return userSocketMap.get(userId);
+    return io;
 };
 
-// ⭐ EXPORT EVERYTHING
-export { app, server, io, getReceiverSocketId };
+// Helper function: get receiver's socket ID
+export const getReceiverSocketId = (userId) => {
+    return userSocketMap.get(userId);
+};
+
+// Export io instance so controllers can emit events
+export { io };
