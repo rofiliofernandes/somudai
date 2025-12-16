@@ -3,6 +3,10 @@ import http from "http";
 import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./utils/db.js";
+import passport from "passport";
+import "./auth/google.js";
+
+
 
 // Routes
 import userRoutes from "./routes/user.route.js";
@@ -14,6 +18,8 @@ import adminRoutes from "./routes/admin.route.js";
 import { initSocket } from "./socket/socket.js";
 
 dotenv.config();
+
+app.use(passport.initialize());
 
 const app = express();
 const server = http.createServer(app);
@@ -43,3 +49,4 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
+
