@@ -13,10 +13,8 @@ import { setPosts } from '@/redux/postSlice';
 const CreatePost = ({ open, setOpen }) => {
   const imageRef = useRef();
 
-  // NEW: Post type state
-  const [postType, setPostType] = useState("image"); // "image" or "text"
-
-  const [file, setFile] = useState("");
+  const [postType, setPostType] = useState("image"); // image | text
+  const [file, setFile] = useState(null);
   const [caption, setCaption] = useState("");
   const [imagePreview, setImagePreview] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,54 +23,58 @@ const CreatePost = ({ open, setOpen }) => {
   const { posts } = useSelector(store => store.post);
   const dispatch = useDispatch();
 
- const fileChangeHandler = async (e) => {
-  const selectedFile = e.target.files?.[0];
-  if (!selectedFile) return;
+  // ================= FILE VALIDATION (STEP 5) =================
+  const fileChangeHandler = async (e) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
 
-  // ❌ Block videos
-  if (!selectedFile.type.startsWith("image/")) {
-    toast.error("Only image files are allowed (no videos)");
-    e.target.value = null;
-    return;
-  }
+    // ❌ block non-images (videos, etc.)
+    if (!selectedFile.type.startsWith("image/")) {
+      toast.error("Only image files are allowed (no videos)");
+      e.target.value = null;
+      return;
+    }
 
-  // ❌ Block large images (5 MB limit)
-  const maxSize = 5 * 1024 * 1024; // 5MB
-  if (selectedFile.size > maxSize) {
-    toast.error("Image size must be under 5MB");
-    e.target.value = null;
-    return;
-  }
+    // ❌ block large images (>5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (selectedFile.size > maxSize) {
+      toast.error("Image must be under 5MB");
+      e.target.value = null;
+      return;
+    }
 
-  // ✅ Allowed formats
-  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-  if (!allowedTypes.includes(selectedFile.type)) {
-    toast.error("Only JPG, PNG, or WEBP images allowed");
-    e.target.value = null;
-    return;
-  }
+    // ❌ block unsupported formats
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(selectedFile.type)) {
+      toast.error("Only JPG, PNG, or WEBP images allowed");
+      e.target.value = null;
+      return;
+    }
 
-  setFile(selectedFile);
-  const dataUrl = await readFileAsDataURL(selectedFile);
-  setImagePreview(dataUrl);
-};
+    setFile(selectedFile);
+    const preview = await readFileAsDataURL(selectedFile);
+    setImagePreview(preview);
+  };
 
-
-  
+  // ================= CREATE POST =================
   const createPostHandler = async () => {
     const formData = new FormData();
-
     formData.append("type", postType);
 
+    // TEXT POST VALIDATION
     if (postType === "text") {
-      // Text post → send caption as "text"
-      formData.append("text", caption);
-    } else {
-      // Image post → caption + file
-      formData.append("caption", caption);
+      if (!caption.trim()) {
+        return toast.error("Text post cannot be empty");
+      }
+      formData.append("text", caption.trim());
+    }
+
+    // IMAGE POST VALIDATION
+    if (postType === "image") {
       if (!file) {
         return toast.error("Please select an image");
       }
+      formData.append("caption", caption);
       formData.append("image", file);
     }
 
@@ -92,11 +94,13 @@ const CreatePost = ({ open, setOpen }) => {
         dispatch(setPosts([res.data.post, ...posts]));
         toast.success(res.data.message);
         setOpen(false);
+        setCaption("");
+        setFile(null);
+        setImagePreview("");
       }
 
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error occurred");
-
+      toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -109,26 +113,23 @@ const CreatePost = ({ open, setOpen }) => {
           Create New Post
         </DialogHeader>
 
-        {/* ------------------ USER INFO ------------------ */}
+        {/* USER INFO */}
         <div className="flex gap-3 items-center">
           <Avatar>
-            <AvatarImage src={user?.profilePicture} alt="img" />
+            <AvatarImage src={user?.profilePicture} />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
-          <div>
-            <h1 className="font-semibold text-xs">{user?.username}</h1>
-            <span className="text-gray-600 text-xs">Bio here...</span>
-          </div>
+          <h1 className="font-semibold text-xs">{user?.username}</h1>
         </div>
 
-        {/* ------------------ POST TYPE TOGGLE ------------------ */}
+        {/* POST TYPE TOGGLE */}
         <div className="flex gap-3 my-3">
           <Button
             variant={postType === "text" ? "default" : "outline"}
             onClick={() => {
               setPostType("text");
+              setFile(null);
               setImagePreview("");
-              setFile("");
             }}
           >
             Text Post
@@ -142,14 +143,13 @@ const CreatePost = ({ open, setOpen }) => {
           </Button>
         </div>
 
-        {/* ------------------ CAPTION / TEXT INPUT ------------------ */}
+        {/* TEXTAREA */}
         <Textarea
           value={caption}
           onChange={(e) => setCaption(e.target.value)}
-          className="focus-visible:ring-transparent border-none"
           placeholder={
             postType === "text"
-              ? "Write your text post (max 280 chars)..."
+              ? "Write a text post (max 280 chars)..."
               : "Write a caption..."
           }
           maxLength={postType === "text" ? 280 : undefined}
@@ -161,51 +161,45 @@ const CreatePost = ({ open, setOpen }) => {
           </p>
         )}
 
-        {/* ------------------ IMAGE PREVIEW ------------------ */}
+        {/* IMAGE PREVIEW */}
         {postType === "image" && imagePreview && (
-          <div className="w-full h-64 flex items-center justify-center">
-            <img
-              src={imagePreview}
-              alt="preview_img"
-              className="object-cover h-full w-full rounded-md"
-            />
-          </div>
+          <img
+            src={imagePreview}
+            className="w-full h-64 object-cover rounded-md"
+            alt="preview"
+          />
         )}
 
-        {/* ------------------ FILE INPUT FOR IMAGE POST ------------------ */}
+        {/* IMAGE PICKER */}
         {postType === "image" && (
           <>
             <input
               ref={imageRef}
               type="file"
+              accept="image/jpeg,image/png,image/webp"
               className="hidden"
               onChange={fileChangeHandler}
             />
-
             <Button
               onClick={() => imageRef.current.click()}
-              className="w-fit mx-auto bg-[#0095F6] hover:bg-[#258bcf]"
+              className="mx-auto bg-[#0095F6]"
             >
-              Select from computer
+              Select Image
             </Button>
           </>
         )}
 
-        {/* ------------------ SUBMIT BUTTON ------------------ */}
-        {loading ? (
-          <Button disabled className="w-full mt-3">
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Please wait
-          </Button>
-        ) : (
-          <Button onClick={createPostHandler} className="w-full mt-3">
-            Post
-          </Button>
-        )}
+        {/* SUBMIT */}
+        <Button
+          onClick={createPostHandler}
+          disabled={loading}
+          className="w-full mt-3"
+        >
+          {loading ? <Loader2 className="animate-spin" /> : "Post"}
+        </Button>
       </DialogContent>
     </Dialog>
   );
 };
 
 export default CreatePost;
-
