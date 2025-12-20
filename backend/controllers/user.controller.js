@@ -16,6 +16,7 @@ export const register = async (req, res) => {
             return res.status(400).json({ message: "Email already exists", success: false });
 
         const hashed = await bcrypt.hash(password, 10);
+        
 
         const user = await User.create({
             username,
@@ -23,12 +24,17 @@ export const register = async (req, res) => {
             password: hashed
         });
 
-        return res.status(201).json({
-            message: "User registered",
-            success: true,
-            user
-        });
+       const { password: _, ...safeUser } = user.toObject();
 
+return res.status(201).json({
+  message: "User registered",
+  success: true,
+  user: safeUser
+});
+
+
+
+        
     } catch (err) {
         console.log(err);
         return res.status(500).json({ message: "Internal server error", success: false });
@@ -173,3 +179,4 @@ export const followOrUnfollow = async (req, res) => {
         return res.status(500).json({ message: "Internal server error", success: false });
     }
 };
+
