@@ -3,8 +3,8 @@ import http from "http";
 import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./utils/db.js";
-// import passport from "passport";
-// import "./auth/google.js";
+import passport from "passport";
+import "./auth/google.js";
 
 
 
@@ -20,9 +20,9 @@ import { initSocket } from "./socket/socket.js";
 
 dotenv.config();
 
-// app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/auth", authRoutes);
 
-// app.use(passport.initialize());
+app.use(passport.initialize());
 
 
 
@@ -54,5 +54,6 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
+
 
 
