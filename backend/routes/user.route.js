@@ -1,16 +1,21 @@
-import passport from "passport";
 import express from "express";
+import {
+  register,
+  login,
+  getProfile,
+  editProfile,
+  followOrUnfollow
+} from "../controllers/user.controller.js";
+
 const router = express.Router();
 
-router.get("/auth/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
+// AUTH
+router.post("/register", register);
+router.post("/login", login);
 
-router.get("/auth/google/callback",
-  passport.authenticate("google", {
-    successRedirect: process.env.CLIENT_URL,
-    failureRedirect: process.env.CLIENT_URL + "/login"
-  })
-);
+// USER
+router.get("/profile", getProfile);
+router.put("/profile", editProfile);
+router.post("/follow/:id", followOrUnfollow);
 
 export default router;
