@@ -1,4 +1,5 @@
 import express from "express";
+import { protect } from "../middlewares/auth.middleware.js";
 import {
   register,
   login,
@@ -14,8 +15,9 @@ router.post("/register", register);
 router.post("/login", login);
 
 // USER
-router.get("/profile", getProfile);
-router.put("/profile", editProfile);
-router.post("/follow/:id", followOrUnfollow);
+router.get("/profile", protect, getProfile);
+router.put("/profile", protect, editProfile);
+router.post("/follow/:id", protect, followOrUnfollow);
 
 export default router;
+
