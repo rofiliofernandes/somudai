@@ -1,0 +1,26 @@
+import express from "express";
+import passport from "passport";
+
+const router = express.Router();
+
+// Start Google OAuth
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+// Google callback
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: "/login",
+    session: false
+  }),
+  (req, res) => {
+    // Successful login → send token to frontend
+    const token = req.user.token;
+    res.redirect(`${process.env.CLIENT_URL}/oauth-success?token=${token}`);
+  }
+);
+
+export default router;
