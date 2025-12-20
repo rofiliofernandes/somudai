@@ -93,7 +93,8 @@ const Login = () => {
   onClick={() => window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`}
   className="flex items-center gap-2 border p-2 rounded-md w-full mt-4 bg-white text-gray-700 hover:bg-gray-100"
 >
-  <img src="/google.svg" className="w-5 h-5" />
+  <img src="/src/assets/google.svg" className="w-5 h-5" />
+              
   Continue with Google
 </button>
 
@@ -108,3 +109,4 @@ const Login = () => {
 
 
 export default Login
+
