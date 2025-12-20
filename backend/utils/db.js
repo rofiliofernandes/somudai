@@ -8,9 +8,13 @@ const connectDB = async () => {
         });
 
         console.log(`📦 MongoDB Connected: ${conn.connection.host}`);
+        console.log("DB URI:", process.env.MONGO_URI);
+
     } catch (error) {
         console.error("❌ MongoDB Connection Failed");
         console.error(error.message);
+        console.log("DB URI:", process.env.MONGO_URI);
+
 
         // Retry connection after 5 seconds
         setTimeout(connectDB, 5000);
@@ -18,3 +22,4 @@ const connectDB = async () => {
 };
 
 export default connectDB;
+
