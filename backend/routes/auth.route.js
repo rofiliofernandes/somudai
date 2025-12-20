@@ -13,14 +13,19 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", {
-    failureRedirect: `${process.env.CLIENT_URL}/login`
+    failureRedirect: `${process.env.CLIENT_URL}/login`,
     session: false
   }),
   (req, res) => {
-    // Successful login → send token to frontend
-    const token = req.user.token;
-    res.redirect(`${process.env.CLIENT_URL}/oauth-success?token=${token}`);
+    // req.user comes from GoogleStrategy
+    const { token } = req.user;
+
+    // Redirect to frontend with token
+    res.redirect(
+      `${process.env.CLIENT_URL}/oauth-success?token=${token}`
+    );
   }
 );
 
 export default router;
+
