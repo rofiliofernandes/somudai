@@ -7,7 +7,7 @@ import cookieParser from "cookie-parser";
 
 import connectDB from "./utils/db.js";
 import passport from "passport";
-import "./utils/passport.js";
+import "./auth/google.js";
 
 // Routes
 import userRoutes from "./routes/user.route.js";
@@ -53,3 +53,4 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(` Server running on port ${PORT}`);
 });
+
