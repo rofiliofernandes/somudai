@@ -6,7 +6,10 @@ const router = express.Router();
 // Start Google OAuth
 router.get(
   "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    session: false,
+  })
 );
 
 // Google callback
@@ -14,18 +17,20 @@ router.get(
   "/google/callback",
   passport.authenticate("google", {
     failureRedirect: `${process.env.CLIENT_URL}/login`,
-    session: false
+    session: false,
   }),
   (req, res) => {
-    // req.user comes from GoogleStrategy
     const { token } = req.user;
 
-    // Redirect to frontend with token
-    res.redirect(
-      `${process.env.CLIENT_URL}/oauth-success?token=${token}`
-    );
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,       // REQUIRED on Render
+      sameSite: "none",   // REQUIRED for frontend-backend
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.redirect(`${process.env.CLIENT_URL}/oauth-success`);
   }
 );
 
 export default router;
-
