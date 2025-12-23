@@ -64,23 +64,27 @@ export const login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    // 🔐 remove password
     const { password: _, ...safeUser } = user.toObject();
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Login successful",
-        token,
-        user: safeUser
-      });
+    //  Set httpOnly cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      user: safeUser
+    });
 
   } catch (err) {
-    console.error(err);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 
 
 
@@ -185,5 +189,6 @@ export const followOrUnfollow = async (req, res) => {
         return res.status(500).json({ message: "Internal server error", success: false });
     }
 };
+
 
 
