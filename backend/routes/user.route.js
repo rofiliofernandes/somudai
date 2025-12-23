@@ -14,6 +14,8 @@ const router = express.Router();
 router.post("/register", register);
 router.post("/login", login);
 router.post("/logout", logout);
+router.post("/refresh", refreshToken);
+
 
 
 // USER
@@ -22,5 +24,6 @@ router.put("/profile", protect, editProfile);
 router.post("/follow/:id", protect, followOrUnfollow);
 
 export default router;
+
 
 
