@@ -16,16 +16,20 @@ passport.use(
       try {
         const email = profile.emails[0].value;
 
-        let user = await User.findOne({ email });
+       let user = await User.findOne({ email });
 
-        if (!user) {
-          user = await User.create({
-            name: profile.displayName,
-            email,
-            avatar: profile.photos[0].value,
-            provider: "google"
-          });
-        }
+if (!user) {
+  user = await User.create({
+    username: profile.displayName,
+    email,
+    profilePicture: profile.photos[0].value,
+    authProvider: "google"
+  });
+} else if (!user.authProvider) {
+  user.authProvider = "google";
+  await user.save();
+}
+
 
         const token = jwt.sign(
           { id: user._id },
@@ -41,6 +45,7 @@ passport.use(
     }
   )
 );
+
 
 
 
