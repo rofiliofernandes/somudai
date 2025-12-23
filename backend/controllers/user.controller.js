@@ -160,6 +160,36 @@ export const editProfile = async (req, res) => {
     }
 };
 
+//REFRESH TOKEN
+
+export const refreshToken = (req, res) => {
+  try {
+    const token = req.cookies.token;
+    if (!token)
+      return res.status(401).json({ success: false });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const newToken = jwt.sign(
+      { id: decoded.id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.cookie("token", newToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    res.status(200).json({ success: true });
+  } catch {
+    res.status(401).json({ success: false });
+  }
+};
+
+
 
 // FOLLOW OR UNFOLLOW
 export const followOrUnfollow = async (req, res) => {
@@ -201,6 +231,7 @@ export const followOrUnfollow = async (req, res) => {
         return res.status(500).json({ message: "Internal server error", success: false });
     }
 };
+
 
 
 
