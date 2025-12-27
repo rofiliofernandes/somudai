@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import axios from "axios";
+import api from "@/lib/axios";
+
 import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useSelector } from "react-redux";
 
-// ✅ Import Google logo correctly (Vite-safe)
+// Vite-safe Google logo import
 import googleLogo from "../assets/google.svg";
 
 const Signup = () => {
@@ -31,16 +32,7 @@ const Signup = () => {
     try {
       setLoading(true);
 
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/v1/user/register`,
-        input,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+      const res = await api.post("/api/v1/user/register", input);
 
       if (res.data.success) {
         toast.success(res.data.message);
@@ -53,9 +45,7 @@ const Signup = () => {
       }
     } catch (error) {
       console.error(error);
-      toast.error(
-        error?.response?.data?.message || "Signup failed"
-      );
+      toast.error(error?.response?.data?.message || "Signup failed");
     } finally {
       setLoading(false);
     }
@@ -68,7 +58,7 @@ const Signup = () => {
   }, [user, navigate]);
 
   return (
-    <div className="flex items-center w-screen h-screen justify-center">
+    <div className="flex items-center justify-center w-screen h-screen">
       <form
         onSubmit={signupHandler}
         className="shadow-lg flex flex-col gap-5 p-8 w-[350px]"
@@ -125,19 +115,15 @@ const Signup = () => {
           <>
             <Button type="submit">Signup</Button>
 
-            {/* ✅ Google Signup Button */}
+            {/* Google Signup */}
             <button
               type="button"
               onClick={() => {
-                window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+                window.location.href = `${import.meta.env.VITE_API_URL}/api/v1/auth/google`;
               }}
               className="flex items-center justify-center gap-2 border p-2 rounded-md w-full mt-2 bg-white text-gray-700 hover:bg-gray-100"
             >
-              <img
-                src={googleLogo}
-                alt="Google"
-                className="w-5 h-5"
-              />
+              <img src={googleLogo} alt="Google" className="w-5 h-5" />
               Continue with Google
             </button>
           </>
