@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import axios from "axios";
+import api from "@/lib/axios";
+
 import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
@@ -31,16 +32,8 @@ const Login = () => {
     try {
       setLoading(true);
 
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/v1/user/login`,
-        input,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+     const res = await api.post("/api/v1/user/login", input);
+
 
       if (res.data.success) {
         dispatch(setAuthUser(res.data.user));
@@ -139,4 +132,5 @@ const Login = () => {
 };
 
 export default Login;
+
 
