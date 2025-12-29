@@ -13,7 +13,7 @@ const router = express.Router();
 // AUTH
 router.post("/register", register);
 router.post("/login", login);
-router.post("/logout", logout);
+
 router.post("/refresh", refreshToken);
 
 
@@ -24,6 +24,7 @@ router.put("/profile", protect, editProfile);
 router.post("/follow/:id", protect, followOrUnfollow);
 
 export default router;
+
 
 
 
