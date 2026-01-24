@@ -11,3 +11,4 @@ export { Screen } from './Screen';
 export { Skeleton } from './Skeleton';
 export { TapButton } from './TapButton';
 export { Text } from './Text';
+export { RadioRow } from './RadioRow';
