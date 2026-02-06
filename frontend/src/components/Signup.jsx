@@ -119,7 +119,7 @@ const Signup = () => {
             <button
               type="button"
               onClick={() => {
-                window.location.href = `${import.meta.env.VITE_API_URL}/api/v1/auth/google`;
+                window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
               }}
               className="flex items-center justify-center gap-2 border p-2 rounded-md w-full mt-2 bg-white text-gray-700 hover:bg-gray-100"
             >
