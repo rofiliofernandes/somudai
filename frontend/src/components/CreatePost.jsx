@@ -6,7 +6,7 @@ import { Button } from './ui/button';
 import { readFileAsDataURL } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { setPosts } from '@/redux/postSlice';
 
@@ -81,8 +81,8 @@ const CreatePost = ({ open, setOpen }) => {
     try {
       setLoading(true);
 
-      const res = await axios.post(
-        "https://instaclone-g9h5.onrender.com/api/v1/post/addpost",
+      const res = await api.post(
+        "/post/addpost",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },

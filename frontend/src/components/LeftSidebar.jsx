@@ -2,7 +2,7 @@ import { Heart, Home, LogOut, MessageCircle, PlusSquare, Search, TrendingUp } fr
 import React, { useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { toast } from 'sonner'
-import axios from 'axios'
+import api from '@/lib/axios'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { setAuthUser } from '@/redux/authSlice'
@@ -21,7 +21,7 @@ const LeftSidebar = () => {
 
     const logoutHandler = async () => {
         try {
-            const res = await axios.get('https://instaclone-g9h5.onrender.com/api/v1/user/logout', { withCredentials: true });
+            const res = await api.get('/user/logout', { withCredentials: true });
             if (res.data.success) {
                 dispatch(setAuthUser(null));
                 dispatch(setSelectedPost(null));
