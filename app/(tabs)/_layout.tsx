@@ -1,3 +1,4 @@
+import type { ColorValue } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, type as typeTokens } from '../../src/theme/tokens';
@@ -6,7 +7,7 @@ type IconName = keyof typeof Ionicons.glyphMap;
 
 const icon =
   (name: IconName) =>
-  ({ color }: { color: string }) => <Ionicons name={name} size={22} color={color} />;
+  ({ color }: { color: ColorValue }) => <Ionicons name={name} size={22} color={color as string} />;
 
 /** Three tabs, icon + label. Active in ink, inactive in inkSecondary. No badges. */
 export default function TabsLayout() {
