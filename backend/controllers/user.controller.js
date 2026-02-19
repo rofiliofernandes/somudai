@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import cloudinary from "../utils/cloudinary.js";
 import { User } from "../models/user.model.js";
+import { authCookieOptions } from "../utils/cookies.js";
 
 // REGISTER
 export const register = async (req, res) => {
@@ -67,12 +68,7 @@ export const login = async (req, res) => {
     const { password: _, ...safeUser } = user.toObject();
 
     //  Set httpOnly cookie
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "None",
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    });
+    res.cookie("token", token, authCookieOptions);
 
     return res.status(200).json({
       success: true,
@@ -164,12 +160,7 @@ export const refreshToken = (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.cookie("token", newToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "None",
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    });
+    res.cookie("token", newToken, authCookieOptions);
 
     res.status(200).json({ success: true });
   } catch {
