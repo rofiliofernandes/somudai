@@ -43,7 +43,7 @@ export default function Home() {
           onEndReachedThreshold={0.6}
           onEndReached={() => posts.hasNextPage && !posts.isFetchingNextPage && posts.fetchNextPage()}
           refreshControl={
-            <RefreshControl refreshing={posts.isRefetching && !posts.isFetchingNextPage} onRefresh={() => posts.refetch()} tintColor={colors.inkSecondary} />
+            <RefreshControl refreshing={posts.isRefetching && !posts.isFetchingNextPage} onRefresh={() => void posts.refetch()} tintColor={colors.inkSecondary} />
           }
           ListFooterComponent={posts.isFetchingNextPage ? <Skeleton variant="card" /> : null}
           ListEmptyComponent={
