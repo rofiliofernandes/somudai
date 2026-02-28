@@ -69,6 +69,7 @@ A simple setup:
    ```
 4. Add all `backend/.env` variables in the platform dashboard.
 5. Set `CLIENT_URL` to your deployed frontend URL.
+   - You can provide multiple allowed origins as comma-separated values (example: `https://app.vercel.app,https://www.app.com`).
 6. After deployment, copy backend URL, e.g. `https://your-api.onrender.com`.
 
 ### Frontend deploy checklist

@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 import connectDB from "./utils/db.js";
 import passport from "passport";
 import "./auth/google.js";
+import { isAllowedOrigin } from "./utils/cors.js";
 
 // Routes
 import userRoutes from "./routes/user.route.js";
@@ -28,7 +29,13 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL, // ❗ NO "*"
+    origin: (origin, callback) => {
+      if (isAllowedOrigin(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("CORS origin not allowed"));
+    },
     credentials: true,
   })
 );

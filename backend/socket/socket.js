@@ -1,4 +1,5 @@
 import { Server } from "socket.io";
+import { isAllowedOrigin } from "../utils/cors.js";
 
 // Socket.io instance (will be initialized later)
 let io;
@@ -10,7 +11,13 @@ const userSocketMap = new Map();
 export const initSocket = (server) => {
     io = new Server(server, {
         cors: {
-            origin: process.env.CLIENT_URL || "*",
+            origin: (origin, callback) => {
+                if (isAllowedOrigin(origin)) {
+                    return callback(null, true);
+                }
+
+                return callback(new Error("Socket origin not allowed"));
+            },
             methods: ["GET", "POST"],
             credentials: true
         }
@@ -19,11 +26,19 @@ export const initSocket = (server) => {
     io.on("connection", (socket) => {
         console.log(`⚡ User connected: ${socket.id}`);
 
+        const queryUserId = socket.handshake.query.userId;
+        if (queryUserId) {
+            userSocketMap.set(queryUserId, socket.id);
+        }
+
+        io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
+
         // Client identifies itself (after login)
         socket.on("identify", (userId) => {
             if (userId) {
                 userSocketMap.set(userId, socket.id);
                 console.log(`Mapped user ${userId} → ${socket.id}`);
+                io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
             }
         });
 
@@ -36,6 +51,8 @@ export const initSocket = (server) => {
                     break;
                 }
             }
+
+            io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
         });
     });
 
