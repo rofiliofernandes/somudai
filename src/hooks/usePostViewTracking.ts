@@ -16,9 +16,9 @@ export function markPostViewed(post: Pick<FeedPost, 'id' | 'type'>) {
 /** Spread onto a FlatList of posts. */
 export function usePostViewTracking() {
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50, minimumViewTime: 1000 }).current;
-  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ListViewToken<FeedPost>[] }) => {
+  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ListViewToken[] }) => {
     for (const v of viewableItems) {
-      if (v.isViewable && v.item) markPostViewed(v.item);
+      if (v.isViewable && v.item) markPostViewed(v.item as FeedPost);
     }
   }).current;
   return { viewabilityConfig, onViewableItemsChanged };
