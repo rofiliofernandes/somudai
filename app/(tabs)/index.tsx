@@ -45,7 +45,7 @@ export default function Home() {
           refreshControl={
             <RefreshControl refreshing={posts.isRefetching && !posts.isFetchingNextPage} onRefresh={() => void posts.refetch()} tintColor={colors.inkSecondary} />
           }
-          ListFooterComponent={posts.isFetchingNextPage ? <Skeleton variant="card" /> : null}
+          ListFooterComponent={posts.isFetchingNextPage ? <Skeleton variant="card" /> : undefined}
           ListEmptyComponent={
             <EmptyState
               message="Nothing near you yet. New matters are added every week."

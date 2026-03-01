@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import type { ViewToken } from 'react-native';
+import type { ListViewToken } from 'react-native';
 import { track } from '../lib/analytics';
 import type { FeedPost } from '../types/db';
 
@@ -16,7 +16,7 @@ export function markPostViewed(post: Pick<FeedPost, 'id' | 'type'>) {
 /** Spread onto a FlatList of posts. */
 export function usePostViewTracking() {
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50, minimumViewTime: 1000 }).current;
-  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken<FeedPost>[] }) => {
+  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ListViewToken<FeedPost>[] }) => {
     for (const v of viewableItems) {
       if (v.isViewable && v.item) markPostViewed(v.item);
     }
