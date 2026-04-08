@@ -13,6 +13,7 @@ jest.mock('expo-haptics', () => ({
 }));
 jest.mock('expo-router', () => ({ router: { push: jest.fn() } }));
 jest.mock('@expo/vector-icons', () => ({ Ionicons: () => null }));
+jest.mock('../../lib/analytics', () => ({ track: jest.fn() }));
 
 const { router } = jest.requireMock('expo-router') as { router: { push: jest.Mock } };
 
