@@ -1,4 +1,4 @@
-import { buttonLabel, countLabel, isEnded, tapAccessibilityLabel, tapState } from './tapWording';
+import { buttonLabel, confirmationLine, countLabel, isEnded, tapAccessibilityLabel, tapState } from './tapWording';
 
 const future = new Date(Date.now() + 86_400_000).toISOString();
 const past = new Date(Date.now() - 86_400_000).toISOString();
@@ -55,6 +55,32 @@ describe('accessibility label', () => {
   it('says the whole thing', () => {
     expect(tapAccessibilityLabel({ type: 'action', title: 'Beach Cleanup at Morjim', tap_count: 1284 }, 'ready')).toBe(
       "I'm joining Beach Cleanup at Morjim. 1,284 joined.",
+    );
+  });
+});
+
+describe('confirmation line', () => {
+  it('counts everyone else for stances', () => {
+    expect(confirmationLine({ type: 'stance', starts_at: null, tap_count: 12_484 })).toBe(
+      'You stand with this, alongside 12,483 people.',
+    );
+    expect(confirmationLine({ type: 'stance', starts_at: null, tap_count: 2 })).toBe(
+      'You stand with this, alongside 1 person.',
+    );
+    expect(confirmationLine({ type: 'stance', starts_at: null, tap_count: 1 })).toBe(
+      "You're the first to stand with this.",
+    );
+  });
+
+  it('names the day for actions this week, the date further out', () => {
+    const now = new Date(2026, 11, 9, 10, 0).getTime(); // Wed 9 Dec
+    const sunday = new Date(2026, 11, 13, 7, 0).toISOString();
+    const later = new Date(2026, 11, 27, 7, 0).toISOString();
+    expect(confirmationLine({ type: 'action', starts_at: sunday, tap_count: 5 }, now)).toBe(
+      "You're joining. See you on Sunday.",
+    );
+    expect(confirmationLine({ type: 'action', starts_at: later, tap_count: 5 }, now)).toBe(
+      "You're joining. See you on Sun 27 Dec.",
     );
   });
 });

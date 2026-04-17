@@ -6,6 +6,7 @@ import { colors, radius, space, touch } from '../theme/tokens';
 import { useTap } from '../hooks/useTap';
 import { useSession } from '../hooks/useSession';
 import { buttonLabel, tapAccessibilityLabel, tapState } from '../lib/tapWording';
+import { track } from '../lib/analytics';
 import type { FeedPost } from '../types/db';
 import { PressableScale } from './PressableScale';
 import { Text } from './Text';
@@ -42,7 +43,14 @@ export function TapButton({ post, size = 'sm', source, onConfirmed }: Props) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     tap.mutate(
       { postId: post.id, tapped: post.tapped },
-      { onSuccess: () => onConfirmed?.({ tapped: !post.tapped }) },
+      {
+        // Analytics only after the server confirms, never on press.
+        onSuccess: () => {
+          if (post.tapped) track('untap', { post_id: post.id, post_type: post.type });
+          else track('tap', { post_id: post.id, post_type: post.type, source });
+          onConfirmed?.({ tapped: !post.tapped });
+        },
+      },
     );
   };
 

@@ -1,5 +1,5 @@
 import type { FeedPost, PostType } from '../types/db';
-import { formatCompact, formatFull } from './format';
+import { formatCompact, formatFull, formatShortDate, formatWeekday } from './format';
 
 // The only place Tap wording lives (CLAUDE.md rule 3). Never "participated",
 // "attended" or "showed up": we cannot measure those.
@@ -49,4 +49,25 @@ export function tapAccessibilityLabel(post: Pick<FeedPost, 'type' | 'title' | 't
     case 'ended':
       return `${post.title} has ended. ${count}.`;
   }
+}
+
+/**
+ * The line above the detail Tap bar after someone Taps.
+ * Action: "You're joining. See you on Sunday."
+ * Stance: "You stand with this, alongside 12,483 people." (everyone else)
+ */
+export function confirmationLine(
+  post: Pick<FeedPost, 'type' | 'starts_at' | 'tap_count'>,
+  now = Date.now(),
+): string {
+  if (post.type === 'action') {
+    if (!post.starts_at) return "You're joining.";
+    const start = new Date(post.starts_at);
+    const days = (start.getTime() - now) / 86_400_000;
+    const when = days < 6 ? formatWeekday(post.starts_at) : formatShortDate(post.starts_at);
+    return `You're joining. See you on ${when}.`;
+  }
+  const others = Math.max(0, post.tap_count - 1);
+  if (others === 0) return "You're the first to stand with this.";
+  return `You stand with this, alongside ${formatFull(others)} ${others === 1 ? 'person' : 'people'}.`;
 }
