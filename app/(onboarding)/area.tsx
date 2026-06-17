@@ -3,6 +3,8 @@ import { StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { Button, RadioRow, Screen, Text } from '../../src/components';
 import { useProfile, useUpdateProfile } from '../../src/hooks/useProfile';
+import { useMyMatters } from '../../src/hooks/useMatters';
+import { track } from '../../src/lib/analytics';
 import { AREAS, type Area } from '../../src/config/areas';
 import { space } from '../../src/theme/tokens';
 
@@ -10,6 +12,7 @@ import { space } from '../../src/theme/tokens';
 export default function YourArea() {
   const profile = useProfile();
   const update = useUpdateProfile();
+  const myMatters = useMyMatters();
   const [area, setArea] = useState<Area | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,7 +27,10 @@ export default function YourArea() {
     update.mutate(
       { area },
       {
-        onSuccess: () => router.replace('/'),
+        onSuccess: () => {
+          track('onboarding_done', { matters_count: myMatters.data?.length ?? 0 });
+          router.replace('/');
+        },
         onError: () => setError("That didn't save. Try again."),
       },
     );

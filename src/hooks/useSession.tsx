@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { queryClient } from '../lib/queryClient';
+import { identify, track } from '../lib/analytics';
 
 type SessionState = {
   session: Session | null;
@@ -24,6 +25,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setState({ session, user: session?.user ?? null, loading: false });
       // Never show one person's cached data to the next person on this device.
       if (event === 'SIGNED_OUT') queryClient.clear();
+      if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+        identify(session.user.id); // the Supabase id only, never email or name
+      }
+      if (session && event === 'SIGNED_IN' && isBrandNew(session.user)) {
+        track('signed_up', { method: session.user.app_metadata.provider === 'google' ? 'google' : 'email' });
+      }
     });
     return () => {
       mounted = false;
@@ -32,6 +39,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return <SessionContext.Provider value={state}>{children}</SessionContext.Provider>;
+}
+
+/** First sign-in: the account was created moments ago. */
+function isBrandNew(user: User): boolean {
+  if (!user.created_at || !user.last_sign_in_at) return false;
+  return Math.abs(new Date(user.last_sign_in_at).getTime() - new Date(user.created_at).getTime()) < 60_000;
 }
 
 export function useSession() {
