@@ -10,8 +10,10 @@ import { useProfile } from '../src/hooks/useProfile';
 import { useMyMatters } from '../src/hooks/useMatters';
 import { takeReturnTo } from '../src/lib/returnTo';
 import { colors } from '../src/theme/tokens';
+import { initSentry, Sentry } from '../src/lib/sentry';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
+initSentry();
 
 // Routes anyone can open, signed in or not.
 const PUBLIC_ROUTES = new Set(['post', 'auth-callback', 'privacy', 'terms', 'contact', '+not-found']);
@@ -69,7 +71,7 @@ function Gate() {
   return null;
 }
 
-export default function RootLayout() {
+function RootLayout() {
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
@@ -88,3 +90,5 @@ export default function RootLayout() {
     </SafeAreaProvider>
   );
 }
+
+export default Sentry.wrap(RootLayout);
