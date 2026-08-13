@@ -5,9 +5,11 @@ import { colors, type as typeTokens } from '../../src/theme/tokens';
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
-const icon =
-  (name: IconName) =>
-  ({ color }: { color: ColorValue }) => <Ionicons name={name} size={22} color={color as string} />;
+function icon(name: IconName) {
+  return function TabIcon({ color }: { color: ColorValue }) {
+    return <Ionicons name={name} size={22} color={color as string} />;
+  };
+}
 
 /** Three tabs, icon + label. Active in ink, inactive in inkSecondary. No badges. */
 export default function TabsLayout() {
