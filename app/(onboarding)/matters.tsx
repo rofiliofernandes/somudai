@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Button, ErrorState, MatterChip, Screen, Skeleton, Text } from '../../src/components';
@@ -12,17 +12,14 @@ export default function ChooseMatters() {
   const matters = useMatters();
   const mine = useMyMatters();
   const save = useSaveMyMatters();
-  const [selected, setSelected] = useState<Set<number>>(new Set());
+  // null = untouched: start from what they already chose.
+  const [draft, setDraft] = useState<Set<number> | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  // Start from what they already chose.
-  useEffect(() => {
-    if (mine.data) setSelected(new Set(mine.data));
-  }, [mine.data]);
+  const selected = draft ?? new Set(mine.data ?? []);
 
   const toggle = (id: number) =>
-    setSelected((prev) => {
-      const next = new Set(prev);
+    setDraft((prev) => {
+      const next = new Set(prev ?? mine.data ?? []);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
