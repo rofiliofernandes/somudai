@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { Button, RadioRow, Screen, Text } from '../../src/components';
@@ -13,13 +13,10 @@ export default function YourArea() {
   const profile = useProfile();
   const update = useUpdateProfile();
   const myMatters = useMyMatters();
-  const [area, setArea] = useState<Area | null>(null);
+  const [picked, setArea] = useState<Area | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const current = profile.data?.area;
-    if (current && (AREAS as readonly string[]).includes(current)) setArea(current as Area);
-  }, [profile.data?.area]);
+  const saved = profile.data?.area;
+  const area = picked ?? ((AREAS as readonly string[]).includes(saved ?? '') ? (saved as Area) : null);
 
   const onGo = () => {
     if (!area) return;
