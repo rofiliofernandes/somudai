@@ -9,7 +9,9 @@ module.exports = defineConfig([
   },
   {
     rules: {
-      // Screens must not talk to Supabase directly; go through src/hooks.
+      // React Native <Text> renders apostrophes and quotes as-is.
+      'react/no-unescaped-entities': 'off',
+      // The auth session lives in SecureStore, never AsyncStorage.
       'no-restricted-imports': [
         'error',
         {
@@ -19,6 +21,18 @@ module.exports = defineConfig([
               message: 'Store the session with expo-secure-store (see src/lib/secureSessionStorage.ts).',
             },
           ],
+        },
+      ],
+    },
+  },
+  {
+    // Screens never call Supabase directly; they go through src/hooks.
+    files: ['app/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [{ group: ['**/lib/supabase'], message: 'Screens call hooks in src/hooks, not Supabase.' }],
         },
       ],
     },
