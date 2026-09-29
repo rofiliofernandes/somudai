@@ -32,6 +32,7 @@ module.exports = defineConfig([
       'no-restricted-imports': [
         'error',
         {
+          paths: [{ name: '@react-native-async-storage/async-storage', message: 'Use expo-secure-store for anything sensitive.' }],
           patterns: [{ group: ['**/lib/supabase'], message: 'Screens call hooks in src/hooks, not Supabase.' }],
         },
       ],
