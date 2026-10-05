@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { Button, RadioRow, Screen, Text } from '../src/components';
 import { useProfile, useUpdateProfile } from '../src/hooks/useProfile';
 import { AREAS } from '../src/config/areas';
+import type { Profile } from '../src/types/db';
 import { colors, radius, space, touch, type as typeTokens } from '../src/theme/tokens';
 
 const BIO_MAX = 160; // matches the check in 0001_init.sql
@@ -11,18 +12,17 @@ const BIO_MAX = 160; // matches the check in 0001_init.sql
 /** A simple form: name, one-line bio, area. */
 export default function EditProfile() {
   const profile = useProfile();
-  const update = useUpdateProfile();
-  const [name, setName] = useState('');
-  const [bio, setBio] = useState('');
-  const [area, setArea] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  if (!profile.data) return <Screen>{null}</Screen>;
+  // Keyed so the form starts from the saved profile.
+  return <EditProfileForm key={profile.data.id} profile={profile.data} />;
+}
 
-  useEffect(() => {
-    if (!profile.data) return;
-    setName(profile.data.display_name ?? '');
-    setBio(profile.data.bio ?? '');
-    setArea(profile.data.area);
-  }, [profile.data]);
+function EditProfileForm({ profile }: { profile: Profile }) {
+  const update = useUpdateProfile();
+  const [name, setName] = useState(profile.display_name ?? '');
+  const [bio, setBio] = useState(profile.bio ?? '');
+  const [area, setArea] = useState<string | null>(profile.area);
+  const [error, setError] = useState<string | null>(null);
 
   const save = () => {
     setError(null);
