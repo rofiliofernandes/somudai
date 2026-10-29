@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="66 86 380 380">
+  <!-- Somudai wave mark: two calm waves, black on off-white. Source for all icons. -->
+  <g fill="none" stroke="#111111" stroke-width="30" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M96 236 Q 149 186 203 236 T 309 236 T 416 236"/>
+    <path d="M96 316 Q 149 266 203 316 T 309 316 T 416 316"/>
+  </g>
+</svg>
